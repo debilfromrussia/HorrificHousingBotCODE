@@ -3,7 +3,7 @@ import threading
 from telebot import types
 
 # ================= НАСТРОЙКИ =================
-TOKEN = "8405287668:AAFGC1qUVhItxcMhffJcNafSN5lCXMisyrY"
+TOKEN = "8405287668:AAFe6JzSomV1aJgrj71w2ZS9CJMUO6619no"
 
 OWNERS = [
     1941490846,   # ← твой ID
