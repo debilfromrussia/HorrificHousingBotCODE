@@ -1,13 +1,13 @@
 import telebot
-from telebot import types
 import threading
+from telebot import types
 
 # ================= НАСТРОЙКИ =================
 TOKEN = "8405287668:AAFGC1qUVhItxcMhffJcNafSN5lCXMisyrY"
 
 OWNERS = [
     1941490846,   # ← твой ID
-    1480732438    # ← второй ID (потом замени)
+    1480732438    # ← ID второго владельца
 ]
 
 HASHTAG = "\n\n#тейк ⊹ ˖✮⋆˙ @HorrificHousingBOT"
@@ -56,28 +56,27 @@ def process_album(media_group_id):
     bot.send_message(user_chat_id, "✅ Ваш тейк отправлен!")
 
 
-# ====================== ОБРАБОТЧИКИ ======================
-
-# 1. Команды (должны быть сверху!)
+# ====================== КОМАНДЫ ======================
 @bot.message_handler(commands=['start'])
 def start(message):
     if message.chat.id in OWNERS:
         bot.send_message(message.chat.id, "✅ Бот запущен.\nВы — владелец.")
     else:
-        bot.send_message(message.chat.id, "👋 Привет, сосед! Здесь ты можешь анонимно отправить свой тейк о всем, что связано с Horrific Housing. Какие-то вопросы? Увидел что-то странное или смешное? Придумал мем? Присылай все это сюда!")
+        bot.send_message(message.chat.id, 
+            "👋 Привет, сосед! Здесь ты можешь анонимно отправить свой тейк о всем, что связано с Horrific Housing.\n\n"
+            "Какие-то вопросы? Увидел что-то странное или смешное? Придумал мем? Присылай все это сюда!")
 
 
 @bot.message_handler(commands=['myid'])
 def myid(message):
     bot.send_message(
         message.chat.id,
-        f"🆔 Ваш ID: <code>{message.chat.id}</code>\n\nОтправьте это число владельцам бота для добавления в владельцы.",
+        f"🆔 Ваш ID: <code>{message.chat.id}</code>",
         parse_mode="HTML"
     )
-    print(f"ID запрошен: {message.chat.id}")
 
 
-# 2. Медиа (фото и видео)
+# ====================== МЕДИА ======================
 @bot.message_handler(content_types=['photo', 'video'])
 def handle_media(message):
     if message.chat.id in OWNERS:
@@ -85,7 +84,11 @@ def handle_media(message):
 
     if message.media_group_id:
         if message.media_group_id not in media_groups:
-            media_groups[message.media_group_id] = {'messages': [], 'user_chat_id': message.chat.id, 'timer': None}
+            media_groups[message.media_group_id] = {
+                'messages': [],
+                'user_chat_id': message.chat.id,
+                'timer': None
+            }
 
         group = media_groups[message.media_group_id]
         group['messages'].append(message)
@@ -107,7 +110,7 @@ def handle_media(message):
             bot.send_message(message.chat.id, "✅ Ваш тейк отправлен!")
 
 
-# 3. Обычный текст (самый последний!)
+# ====================== ТЕКСТ ======================
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
     if message.chat.id in OWNERS:
@@ -116,5 +119,10 @@ def handle_text(message):
     bot.send_message(message.chat.id, "✅ Ваш тейк отправлен!")
 
 
-print("🤖 Бот запущен")
-bot.infinity_polling()
+# ====================== ЗАПУСК ======================
+if __name__ == "__main__":
+    bot.delete_webhook(drop_pending_updates=True)
+    print("✅ Webhook успешно удалён")
+
+    print("🤖 Бот запущен 24/7...")
+    bot.infinity_polling()
