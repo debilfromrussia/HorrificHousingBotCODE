@@ -6,7 +6,7 @@ import time
 
 # ================= НАСТРОЙКИ =================
 # ВСТАВЬ СВОЙ ТОКЕН СЮДА ВМЕСТО ЭТОЙ СТРОКИ:
-TOKEN = "8405287668:AAFGC1qUVhItxcMhffJcNafSN5lCXMisyrY"
+TOKEN = "8405287668:AAFe6JzSomV1aJgrj71w2ZS9CJMUO6619no"
 
 OWNERS = [
     1941490846,   # ← твой ID
