@@ -5,7 +5,8 @@ import os
 import time
 
 # ================= НАСТРОЙКИ =================
-TOKEN = os.getenv("8405287668:AAFGC1qUVhItxcMhffJcNafSN5lCXMisyrY")
+# ВСТАВЬ СВОЙ ТОКЕН СЮДА ВМЕСТО ЭТОЙ СТРОКИ:
+TOKEN = "8405287668:AAFGC1qUVhItxcMhffJcNafSN5lCXMisyrY"
 
 OWNERS = [
     1941490846,   # ← твой ID
@@ -19,7 +20,6 @@ bot = telebot.TeleBot(TOKEN)
 
 media_groups = {}
 
-# ====================== ФУНКЦИИ ======================
 def send_to_all_owners(media_list=None, text=None, photo=None, video=None, caption=None):
     for owner_id in OWNERS:
         try:
@@ -112,10 +112,9 @@ if __name__ == "__main__":
         bot.set_webhook(url=url)
         print(f"✅ Webhook успешно установлен: {url}")
     else:
-        print("❌ Ошибка: RAILWAY_PUBLIC_DOMAIN не найден")
+        print("❌ RAILWAY_PUBLIC_DOMAIN не найден")
 
     print("🤖 Бот запущен 24/7 через Webhook")
 
-    # Держим процесс живым
     while True:
         time.sleep(60)
