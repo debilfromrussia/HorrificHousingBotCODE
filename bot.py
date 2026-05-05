@@ -5,7 +5,7 @@ import os
 import time
 
 # ================= НАСТРОЙКИ =================
-TOKEN = os.getenv("TOKEN")
+TOKEN = os.getenv("8405287668:AAFGC1qUVhItxcMhffJcNafSN5lCXMisyrY")
 
 OWNERS = [
     1941490846,   # ← твой ID
@@ -19,6 +19,7 @@ bot = telebot.TeleBot(TOKEN)
 
 media_groups = {}
 
+# ====================== ФУНКЦИИ ======================
 def send_to_all_owners(media_list=None, text=None, photo=None, video=None, caption=None):
     for owner_id in OWNERS:
         try:
@@ -56,12 +57,11 @@ def process_album(media_group_id):
 
     bot.send_message(user_chat_id, "✅ Ваш тейк отправлен!")
 
-
 # ====================== КОМАНДЫ ======================
 @bot.message_handler(commands=['start'])
 def start(message):
     if message.chat.id in OWNERS:
-        bot.send_message(message.chat.id, "✅ Бот запущен.\nВы — владелец.")
+        bot.send_message(message.chat.id, "✅ Бот онлайн и работает 24/7.")
     else:
         bot.send_message(message.chat.id, 
             "👋 Привет, сосед! Здесь ты можешь анонимно отправить свой тейк о всем, что связано с Horrific Housing.\n\n"
@@ -71,19 +71,16 @@ def start(message):
 def myid(message):
     bot.send_message(message.chat.id, f"🆔 Ваш ID: <code>{message.chat.id}</code>", parse_mode="HTML")
 
-
 # ====================== ОБРАБОТЧИКИ ======================
 @bot.message_handler(content_types=['photo', 'video'])
 def handle_media(message):
-    if message.chat.id in OWNERS:
-        return
+    if message.chat.id in OWNERS: return
     if message.media_group_id:
         if message.media_group_id not in media_groups:
             media_groups[message.media_group_id] = {'messages': [], 'user_chat_id': message.chat.id, 'timer': None}
         group = media_groups[message.media_group_id]
         group['messages'].append(message)
-        if group.get('timer'):
-            group['timer'].cancel()
+        if group.get('timer'): group['timer'].cancel()
         group['timer'] = threading.Timer(2.0, process_album, args=[message.media_group_id])
         group['timer'].start()
     else:
@@ -100,25 +97,22 @@ def handle_media(message):
 
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
-    if message.chat.id in OWNERS:
-        return
+    if message.chat.id in OWNERS: return
     send_to_all_owners(text=message.text + HASHTAG)
     bot.send_message(message.chat.id, "✅ Ваш тейк отправлен!")
 
-
 # ====================== WEBHOOK ======================
 if __name__ == "__main__":
-    # Удаляем старый webhook
     bot.delete_webhook(drop_pending_updates=True)
     print("✅ Старый webhook удалён")
 
-    # Устанавливаем новый webhook
-    webhook_url = os.getenv("RAILWAY_PUBLIC_DOMAIN")
-    if webhook_url:
-        bot.set_webhook(url=webhook_url)
-        print(f"✅ Webhook установлен: {webhook_url}")
+    domain = os.getenv("RAILWAY_PUBLIC_DOMAIN")
+    if domain:
+        url = f"https://{domain}"
+        bot.set_webhook(url=url)
+        print(f"✅ Webhook успешно установлен: {url}")
     else:
-        print("⚠️ RAILWAY_PUBLIC_DOMAIN не найден")
+        print("❌ Ошибка: RAILWAY_PUBLIC_DOMAIN не найден")
 
     print("🤖 Бот запущен 24/7 через Webhook")
 
