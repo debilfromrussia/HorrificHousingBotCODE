@@ -1,20 +1,22 @@
+from flask import Flask, request
 import telebot
 import threading
 from telebot import types
-import time
+import os
 
 # ================= НАСТРОЙКИ =================
-TOKEN = "8405287668:AAFe6JzSomV1aJgrj71w2ZS9CJMUO6619no"   # ← убедись, что токен свежий
+TOKEN = os.getenv("8405287668:AAFe6JzSomV1aJgrj71w2ZS9CJMUO6619no")                    # ← токен из Variables
 
 OWNERS = [
     1941490846,   # ← твой ID
-    1480732438    # ← ID второго
+    1480732438    # ← ID второго владельца
 ]
 
 HASHTAG = "\n\n#тейк ⊹ ˖✮⋆˙ @HorrificHousingBOT"
 # ============================================
 
 bot = telebot.TeleBot(TOKEN)
+app = Flask(__name__)
 
 media_groups = {}
 
@@ -55,11 +57,11 @@ def process_album(media_group_id):
 
     bot.send_message(user_chat_id, "✅ Ваш тейк отправлен!")
 
-# ====================== КОМАНДЫ ======================
+# ====================== ОБРАБОТЧИКИ ======================
 @bot.message_handler(commands=['start'])
 def start(message):
     if message.chat.id in OWNERS:
-        bot.send_message(message.chat.id, "✅ Бот онлайн и работает 24/7.")
+        bot.send_message(message.chat.id, "✅ Бот онлайн 24/7.")
     else:
         bot.send_message(message.chat.id, 
             "👋 Привет, сосед! Здесь ты можешь анонимно отправить свой тейк о всем, что связано с Horrific Housing.\n\n"
@@ -69,10 +71,10 @@ def start(message):
 def myid(message):
     bot.send_message(message.chat.id, f"🆔 Ваш ID: <code>{message.chat.id}</code>", parse_mode="HTML")
 
-# ====================== ОБРАБОТЧИКИ ======================
 @bot.message_handler(content_types=['photo', 'video'])
 def handle_media(message):
     if message.chat.id in OWNERS: return
+    # ... (тот же код обработки медиа) ...
     if message.media_group_id:
         if message.media_group_id not in media_groups:
             media_groups[message.media_group_id] = {'messages': [], 'user_chat_id': message.chat.id, 'timer': None}
@@ -99,11 +101,34 @@ def handle_text(message):
     send_to_all_owners(text=message.text + HASHTAG)
     bot.send_message(message.chat.id, "✅ Ваш тейк отправлен!")
 
-# ====================== ЗАПУСК ======================
+# ====================== WEBHOOK ======================
+@app.route('/', methods=['POST'])
+def webhook():
+    if request.headers.get('content-type') == 'application/json':
+        json_string = request.get_data().decode('utf-8')
+        update = telebot.types.Update.de_json(json_string)
+        bot.process_new_updates([update])
+    return '', 200
+
+@app.route('/')
+def index():
+    return "Бот работает 24/7 ✅"
+
 if __name__ == "__main__":
-    print("🚀 Запуск бота...")
     bot.delete_webhook(drop_pending_updates=True)
-    print("✅ Webhook удалён")
-    
-    print("🤖 Бот запущен 24/7 (Polling mode)")
-    bot.infinity_polling(none_stop=True, interval=1, timeout=20)
+    print("✅ Старый webhook удалён")
+
+    # Устанавливаем webhook
+    domain = os.getenv("RAILWAY_PUBLIC_DOMAIN")
+    if domain:
+        url = f"https://{domain}"
+        bot.set_webhook(url=url)
+        print(f"✅ Webhook установлен: {url}")
+    else:
+        print("❌ RAILWAY_PUBLIC_DOMAIN не найден")
+
+    print("🤖 Бот запущен через Flask + Webhook")
+
+    # Запускаем Flask
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
