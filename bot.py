@@ -1,16 +1,14 @@
 import telebot
 import threading
 from telebot import types
-import os
 import time
 
 # ================= НАСТРОЙКИ =================
-# ВСТАВЬ СВОЙ ТОКЕН СЮДА ВМЕСТО ЭТОЙ СТРОКИ:
-TOKEN = "8405287668:AAFe6JzSomV1aJgrj71w2ZS9CJMUO6619no"
+TOKEN = "8405287668:AAFe6JzSomV1aJgrj71w2ZS9CJMUO6619no"   # ← убедись, что токен свежий
 
 OWNERS = [
     1941490846,   # ← твой ID
-    1480732438    # ← ID второго владельца
+    1480732438    # ← ID второго
 ]
 
 HASHTAG = "\n\n#тейк ⊹ ˖✮⋆˙ @HorrificHousingBOT"
@@ -101,20 +99,11 @@ def handle_text(message):
     send_to_all_owners(text=message.text + HASHTAG)
     bot.send_message(message.chat.id, "✅ Ваш тейк отправлен!")
 
-# ====================== WEBHOOK ======================
+# ====================== ЗАПУСК ======================
 if __name__ == "__main__":
+    print("🚀 Запуск бота...")
     bot.delete_webhook(drop_pending_updates=True)
-    print("✅ Старый webhook удалён")
-
-    domain = os.getenv("RAILWAY_PUBLIC_DOMAIN")
-    if domain:
-        url = f"https://{domain}"
-        bot.set_webhook(url=url)
-        print(f"✅ Webhook успешно установлен: {url}")
-    else:
-        print("❌ RAILWAY_PUBLIC_DOMAIN не найден")
-
-    print("🤖 Бот запущен 24/7 через Webhook")
-
-    while True:
-        time.sleep(60)
+    print("✅ Webhook удалён")
+    
+    print("🤖 Бот запущен 24/7 (Polling mode)")
+    bot.infinity_polling(none_stop=True, interval=1, timeout=20)
